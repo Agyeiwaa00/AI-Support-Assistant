@@ -1,33 +1,54 @@
 "use client";
-import { Box, Stack, TextField, Button} from "@mui/material";
+import { Box, Stack, TextField, Button } from "@mui/material";
 import { useState } from "react";
 
 export default function Home() {
+
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: `Hello. I am amaChatbot support, how may help you`,
+      content: `Hello. I am amaChatbot support, how may help you?`,
     },
   ]);
+  
 
   const sendMessage = async () => {
     setMessage('')
-    setMessages((messages) => [...messages, {role:'user', content:message}])
-    const response = fetch("/api/chat", {
-      method: "POST",
-      headers: {"Content-Type": "application/json",},
-      body: JSON.stringify([...message, { role: "user", content: message }]),
+    setMessages((messages) => [...messages, {role:'user', content:message },
+      {role:'assistant', content:''}
+    ])
+    const response = fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json',},
+      body: JSON.stringify([...messages, { role: 'user', content: message }]),
     }).then(async (res) => {
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+      let result = ''
+      return reader.read().then(function processText({done, value}){
+      if (done) {
+        return result
+      }
+
+      const text = decoder.decode(value || new Uint8Array(), {stream:true})
+      setMessages((messages) =>{
+      let lastMessage = messages(messages.length-1)
+      let otherMessage = messages.slice(0, messages.length-1)
       
+      return [
+        ...otherMessage, {...lastMessage, content:lastMessage.content + text},
+      ]
     })
+  
+      return reader.read().then(processText)
+      })
+   })
   }
-   
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   return (
     <Box
-      width="500vw"
+      width="100vw"
       height="100vh"
-      //bgcolor={}
       display="flex"
       flexDirection="column"
       justifyContent="center"
@@ -36,7 +57,7 @@ export default function Home() {
       <Stack
         direction={"column"}
         width="500px"
-        height="700px"
+        height="500px"
         border="1px solid black"
         p={2}
         spacing={3}
@@ -57,7 +78,7 @@ export default function Home() {
               }
             >
               <Box
-                bgcolor={
+                bgColor={
                   message.role === "assistant"
                     ? "primary.main"
                     : "secondary.main"
@@ -86,3 +107,4 @@ export default function Home() {
     </Box>
   );
 }
+
