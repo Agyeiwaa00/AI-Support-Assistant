@@ -13,22 +13,21 @@ export default function Home() {
   const sendMessage = async () => {
     setMessage('')
     setMessages((messages) => [...messages, {role:'user', content:message}])
-    const response = await fetch("/api/chat", {
+    const response = fetch("/api/chat", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: {"Content-Type": "application/json",},
       body: JSON.stringify([...message, { role: "user", content: message }]),
-    });
-
-    const data = await response.json();
-    setMessages((messages) => [...messages, { roles: "assistant", content: data.message }]);
-  };
+    }).then(async (res) => {
+      
+    })
+  }
+   
   const [message, setMessage] = useState("");
   return (
     <Box
-      width="100vw"
+      width="500vw"
       height="100vh"
+      //bgcolor={}
       display="flex"
       flexDirection="column"
       justifyContent="center"
