@@ -8,13 +8,17 @@ to the platform so you can provide the most accurate and up-to-date information 
 
 // POST function to handle incoming requests
 export async function POST(req) {
-  const openai = new OpenAI();
+  const openai = new OpenAI({
+    apiKey:
+      "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",
+  });
+
   const data = await req.json();
 
   // Initiating the chat completion with streaming
 const completion = await openai.chat.completions.create({
     messages: [{role: "system", content: systemPrompt},...data],
-       model:"gpt-4o",
+       model:"gpt-3.5-turbo",
        stream: true,
   });
 

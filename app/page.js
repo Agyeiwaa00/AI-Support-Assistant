@@ -32,7 +32,8 @@ export default function Home() {
 
       const text = decoder.decode(value || new Uint8Array(), {stream:true})
       setMessages((messages) =>{
-      let lastMessage = messages(messages.length-1)
+        let lastMessage = messages.slice(messages.length-1)
+
       let otherMessage = messages.slice(0, messages.length-1)
       
       return [
@@ -78,7 +79,7 @@ export default function Home() {
               }
             >
               <Box
-                bgColor={
+                bgcolor={
                   message.role === "assistant"
                     ? "primary.main"
                     : "secondary.main"
