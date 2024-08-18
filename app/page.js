@@ -7,11 +7,10 @@ export default function Home() {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: `Hello. I am amaChatbot support, how may help you?`,
+      content: `Hello. I am amaChatbot, how may help you?`,
     },
   ]);
   
-
   const sendMessage = async () => {
     setMessage('')
     setMessages((messages) => [...messages, {role:'user', content:message },
@@ -34,7 +33,7 @@ export default function Home() {
       setMessages((messages) =>{
         let lastMessage = messages.slice(messages.length-1)
 
-      let otherMessage = messages.slice(0, messages.length-1)
+        let otherMessage = messages.slice(0, messages.length-1)
       
       return [
         ...otherMessage, {...lastMessage, content:lastMessage.content + text},
