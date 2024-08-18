@@ -9,8 +9,8 @@ to the platform so you can provide the most accurate and up-to-date information 
 // POST function to handle incoming requests
 export async function POST(req) {
   const openai = new OpenAI({
-    apiKey:
-      ''
+    //apiKey:
+      
   });
 
   const data = await req.json();
