@@ -2,49 +2,66 @@
 import { Box, Stack, TextField, Button } from "@mui/material";
 import { useState } from "react";
 
-export default function Home() {
 
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content: `Hello. I am amaChatbot, how may help you?`,
-    },
-  ]);
+   export default function Home() {
+    const [messages, setMessages] = useState([
+      {
+        role: "assistant",
+        content: `Hello. I am AmaChatbot, how may I help you?`,
+      },
+    ]);
   
-  const sendMessage = async () => {
-    setMessage('')
-    setMessages((messages) => [...messages, {role:'user', content:message },
-      {role:'assistant', content:''}
-    ])
-    const response = fetch('/api/chat', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json',},
-      body: JSON.stringify([...messages, { role: 'user', content: message }]),
-    }).then(async (res) => {
-    const reader = res.body.getReader()
-    const decoder = new TextDecoder()
-      let result = ''
-      return reader.read().then(function processText({done, value}){
-      if (done) {
-        return result
+    const [message, setMessage] = useState('');
+  
+    const sendMessage = async () => {
+      // Append the user's message and an empty assistant message to the state
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { role: 'user', content: message },
+        { role: 'assistant', content: '' },
+      ]);
+  
+      // Clear the input message after sending
+      setMessage('');
+  
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify([...messages, { role: 'user', content: message }]),
+        });
+  
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let result = '';
+  
+        const processText = async ({ done, value }) => {
+          if (done) {
+            return result;
+          }
+  
+          const text = decoder.decode(value || new Uint8Array(), { stream: true });
+          result += text;
+  
+          setMessages((prevMessages) => {
+            const lastMessageIndex = prevMessages.length - 1;
+            const lastMessage = prevMessages[lastMessageIndex];
+  
+            return [
+              ...prevMessages.slice(0, lastMessageIndex),
+              { ...lastMessage, content: lastMessage.content + text },
+            ];
+          });
+  
+          return reader.read().then(processText);
+        };
+  
+        await reader.read().then(processText);
+      } catch (error) {
+        console.error('Error:', error);
+        // Handle error appropriately
       }
-
-      const text = decoder.decode(value || new Uint8Array(), {stream:true})
-      setMessages((messages) =>{
-        let lastMessage = messages.slice(messages.length-1)
-
-        let otherMessage = messages.slice(0, messages.length-1)
-      
-      return [
-        ...otherMessage, {...lastMessage, content:lastMessage.content + text},
-      ]
-    })
-  
-      return reader.read().then(processText)
-      })
-   })
-  }
-  const [message, setMessage] = useState('');
+    };
   return (
     <Box
       width="100vw"
@@ -107,4 +124,50 @@ export default function Home() {
     </Box>
   );
 }
+     /* method 2
+     
+     export default function Home() {
 
+  const [messages, setMessages] = useState([
+    {
+      role: "assistant",
+      content: `Hello. I am amaChatbot, how may help you?`,
+    },
+  ]);
+
+  const [message, setMessage] = useState('');
+  const sendMessage = async () => {
+    setMessage('')
+    setMessages((messages) => [...messages,{role:'user', content:message},
+    {role:'assistant', content:''}
+   ])
+   
+    const response = fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json',},
+      body: JSON.stringify([...messages, { role: 'user', content: message}]),
+    }).then(async (res) => {
+      
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+      let result = ''
+      return reader.read().then(function processText({done, value}){
+      if (done) {
+        return result
+      }
+
+      const text = decoder.decode(value || new Uint8Array(), {stream:true})
+      setMessages((messages) =>{
+        let lastMessage = messages.slice(messages.length-1)
+
+        let otherMessage = messages.slice(0, messages.length-1)
+      
+      return [
+        ...otherMessage, {...lastMessage, content:lastMessage.content + text},
+      ]
+    })
+  
+       return reader.read().then(processText)
+      })
+   })
+  } */
